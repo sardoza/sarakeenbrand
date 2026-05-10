@@ -8,6 +8,63 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:#1E1E1E;color:#fff;min-height:100vh}
+
+/* PASSWORD GATE */
+#gate{position:fixed;inset:0;z-index:9999;background:#1E1E1E;display:flex;align-items:center;justify-content:center;transition:opacity 0.5s ease}
+#gate.hidden{opacity:0;pointer-events:none}
+.gate-card{width:100%;max-width:380px;padding:2.5rem;text-align:center}
+.gate-logo{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:#fff;letter-spacing:0.02em;margin-bottom:0.4rem}
+.gate-logo span{color:#F572B1}
+.gate-tagline{font-size:0.7rem;letter-spacing:0.14em;text-transform:uppercase;color:#666;margin-bottom:2.5rem}
+.gate-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:#fff;margin-bottom:0.5rem;line-height:1.2}
+.gate-title em{font-style:italic;color:#F572B1}
+.gate-desc{font-size:0.8rem;color:#666;margin-bottom:2rem;line-height:1.7}
+.gate-input-wrap{position:relative;margin-bottom:1rem}
+.gate-input{width:100%;padding:0.875rem 1rem;background:rgba(255,255,255,0.05);border:0.5px solid rgba(255,255,255,0.12);border-radius:2px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.2s;letter-spacing:0.08em}
+.gate-input::placeholder{color:rgba(255,255,255,0.2)}
+.gate-input:focus{border-color:rgba(245,114,177,0.5)}
+.gate-input.error{border-color:rgba(220,80,80,0.6)}
+.toggle-pw{position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.3);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;font-family:'DM Sans',sans-serif;transition:color 0.2s}
+.toggle-pw:hover{color:rgba(255,255,255,0.6)}
+.gate-btn{width:100%;padding:0.875rem;background:#F572B1;border:none;border-radius:2px;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.8rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;margin-bottom:1rem}
+.gate-btn:hover{background:#D4508F;transform:translateY(-1px)}
+.gate-btn:active{transform:translateY(0)}
+.gate-error{font-size:0.75rem;color:rgba(220,80,80,0.8);height:1rem;transition:opacity 0.2s}
+.gate-error.visible{opacity:1}
+.gate-error.hidden{opacity:0}
+.gate-divider{height:0.5px;background:rgba(255,255,255,0.06);margin:1.5rem 0}
+.gate-footer{font-size:0.68rem;color:rgba(255,255,255,0.2);letter-spacing:0.06em}
+
+/* MAIN CONTENT — hidden until unlocked */
+#main{display:none}
+#main.visible{display:block}
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">Sara Keen <span>AI Branding</span></div>
+    <div class="gate-tagline">on brand, always.</div>
+    <div class="gate-title">Claude <em>Workspace</em><br>Architect</div>
+    <p class="gate-desc">This document is private. Enter your password to access the full framework.</p>
+    <div class="gate-input-wrap">
+      <input type="password" id="pw-input" class="gate-input" placeholder="Enter password" autocomplete="current-password" />
+      <button class="toggle-pw" id="toggle-pw" type="button">show</button>
+    </div>
+    <div class="gate-error hidden" id="gate-error">Incorrect password. Try again.</div>
+    <button class="gate-btn" id="gate-btn">Access Framework</button>
+    <div class="gate-divider"></div>
+    <div class="gate-footer">Private access only &nbsp;·&nbsp; Sara Keen AI Branding &nbsp;·&nbsp; 2026</div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="main">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --pink:#F572B1;
   --pink-dark:#D4508F;
@@ -200,8 +257,7 @@ footer{border-top:0.5px solid var(--border);padding:2rem 4rem;display:flex;align
   nav ul{display:none}
 }
 </style>
-</head>
-<body>
+
 
 <nav>
   <div class="nav-brand">Sara Keen <span>AI Branding</span></div>
@@ -644,5 +700,66 @@ footer{border-top:0.5px solid var(--border);padding:2rem 4rem;display:flex;align
   <div class="footer-text">on brand, always.</div>
 </footer>
 
+</div>
+
+<script>
+(function(){
+  var HASH = '9a4bfce7d0a8bcd5a7e2f1d3c8b6a9e0f2d4c7b1a3e8f5d2c9b6a4e7f0d3c1';
+
+  function sha256simple(str) {
+    var hash = 0;
+    for (var i = 0; i < str.length; i++) {
+      var char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16).padStart(8,'0');
+  }
+
+  var CORRECT = 'sarakeen2026';
+  var SESSION_KEY = 'sk_workspace_auth';
+
+  function unlock() {
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('main').classList.add('visible');
+    setTimeout(function(){
+      document.getElementById('gate').style.display = 'none';
+    }, 500);
+    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch(e){}
+  }
+
+  function check() {
+    var val = document.getElementById('pw-input').value.trim();
+    if (val === CORRECT) {
+      document.getElementById('pw-input').classList.remove('error');
+      document.getElementById('gate-error').classList.remove('visible');
+      document.getElementById('gate-error').classList.add('hidden');
+      unlock();
+    } else {
+      document.getElementById('pw-input').classList.add('error');
+      document.getElementById('gate-error').classList.remove('hidden');
+      document.getElementById('gate-error').classList.add('visible');
+      document.getElementById('pw-input').value = '';
+      document.getElementById('pw-input').focus();
+    }
+  }
+
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    unlock();
+  }
+
+  document.getElementById('gate-btn').addEventListener('click', check);
+  document.getElementById('pw-input').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') check();
+  });
+
+  var showing = false;
+  document.getElementById('toggle-pw').addEventListener('click', function(){
+    showing = !showing;
+    document.getElementById('pw-input').type = showing ? 'text' : 'password';
+    this.textContent = showing ? 'hide' : 'show';
+  });
+})();
+</script>
 </body>
 </html>
